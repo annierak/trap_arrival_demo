@@ -6,7 +6,8 @@ from pompy import models
 from matplotlib.widgets import Slider,Button
 import sys
 
-def f0(intended_heading_angles,wind_mag,wind_angle):
+def f0(intended_heading_angles,wind_mag,wind_angle,
+    speed_sigmoid_func='original',plot=False):
     #Converts intended heading angles to track heading angles
     #Currently only have computation for c1 = 0, c2 = 1
     n = len(intended_heading_angles)
@@ -23,7 +24,13 @@ def f0(intended_heading_angles,wind_mag,wind_angle):
     #     intended_heading_angles[sign_change_inds]+np.pi)%(2*np.pi)
     # track_heading_angles = (np.arctan(wind_mag*np.sin(
     #     wind_angle-thetas_adjusted)/np.abs(r_1s))+thetas_adjusted)%(2*np.pi)
-    adjusted_mag = utility.speed_sigmoid_func(signed_wind_par_mags)
+    if speed_sigmoid_func=='original':
+        adjusted_mag = utility.speed_sigmoid_func(signed_wind_par_mags)
+    elif speed_sigmoid_func=='new_a':
+        adjusted_mag = utility.new_speed_sigmoid_func_perfect_controller(signed_wind_par_mags)
+    else:
+        print('Need proper input of desired speed sigmoid function')
+        sys.exit()
     # print('-------------')
     # print(adjusted_mag)
 
@@ -48,6 +55,51 @@ def f0(intended_heading_angles,wind_mag,wind_angle):
     heading_final_vec = intended_heading_vectors+w_perp_vec
     dispersing_speeds = np.sqrt(np.sum(heading_final_vec**2,axis=0))
     track_heading_angles = np.arctan2(heading_final_vec[1],heading_final_vec[0])
+
+    if plot:
+        fig13 = plt.figure(13)
+        plt.clf()
+        ax = plt.subplot()
+        ax.spines['left'].set_position('center')
+        ax.spines['bottom'].set_position('center')
+
+        # Eliminate upper and right axes
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+
+        # Show ticks in the left and lower axes only
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+
+        ax.spines['bottom'].set_position('zero')
+        ax.spines['left'].set_position('zero')
+
+        ax.set_xlim([-4,7])
+        ax.set_ylim([-3,6])
+        ax.set_xlabel('Parallel Windspeed Magnitude')
+
+        markersize=0.2
+
+        plt.scatter(signed_wind_par_mags,adjusted_mag,
+        label='intended groundspeed',s=markersize,color='orange')
+
+        wind_perp_mags = np.sqrt(np.sum(w_perp_vec**2,axis=0))
+
+        plt.scatter(signed_wind_par_mags,wind_perp_mags,
+        label='wind perp mag',s=markersize,color='blue')
+
+        sc = plt.scatter(signed_wind_par_mags,dispersing_speeds,
+            label='final groundspeed',
+                cmap='cool',s=markersize,c=dispersing_speeds,vmin=0.,vmax=4.)
+        lgnd = plt.legend()
+        lgnd.legendHandles[0]._sizes = [30]
+        lgnd.legendHandles[1]._sizes = [30]
+        lgnd.legendHandles[2]._sizes = [30]
+
+        plt.colorbar(sc)
+
+        fig13.canvas.draw_idle()
+
 
     # plt.figure()
     # ax = plt.subplot()
