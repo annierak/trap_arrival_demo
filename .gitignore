@@ -8,6 +8,6 @@
 *.pkl
 *.png
 *.html
-.ipynb_checkpoints/
+.ipynb_checkpoints
 .__pychache__
 *.json
