@@ -7,8 +7,10 @@ from matplotlib.widgets import Slider,Button
 import sys
 
 def f0(intended_heading_angles,wind_mag,wind_angle,
-    speed_sigmoid_func='original',plot=False):
+    speed_sigmoid_func='original',plot=False,c1=0,c2=1):
     #Converts intended heading angles to track heading angles
+
+
     #Currently only have computation for c1 = 0, c2 = 1
     n = len(intended_heading_angles)
     # intended_heading_angles = np.linspace(360./n,360,n)*np.pi/180
@@ -52,7 +54,7 @@ def f0(intended_heading_angles,wind_mag,wind_angle,
     # print(wind_par_vec)
 
     w_perp_vec = w_vec[:,None] - wind_par_vec
-    heading_final_vec = intended_heading_vectors+w_perp_vec
+    heading_final_vec = intended_heading_vectors+c1*wind_par_vec+ c2*w_perp_vec
     dispersing_speeds = np.sqrt(np.sum(heading_final_vec**2,axis=0))
     track_heading_angles = np.arctan2(heading_final_vec[1],heading_final_vec[0])
 

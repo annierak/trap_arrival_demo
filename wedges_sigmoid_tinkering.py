@@ -12,7 +12,7 @@ import odor_tracking_sim.utility as utility
 from pompy import models
 from matplotlib.widgets import Slider,Button
 from matplotlib.transforms import Bbox
-from extras import UpdatingVPatch,plot_wedges
+from extras import UpdatingVPatch,plot_wedges,VertSlider
 from core_functions import f0,f1,f1_wedge,f2,f3,f4,f5
 
 
@@ -23,7 +23,8 @@ wind_angle = 7*scipy.pi/8.
 # wind_angle = 9*scipy.pi/8.
 # wind_angle =15*scipy.pi/16.
 wind_mag = 1.0
-num_flies = 20000
+# num_flies = 20000
+num_flies = 5000
 fly_speed = 1.6
 
 initial_cone_angle = np.radians(20.)
@@ -32,6 +33,11 @@ release_times=0.
 
 K = -.4
 x_0 = 300
+
+c1 = 0.
+c2 = 1.
+
+
 
 
 number_sources = 8
@@ -72,7 +78,7 @@ for plume_wedge in plume_wedges:
 
 #Convert intended heading angles to track heading angles
 track_heading_angles,dispersing_speeds = f0(intended_heading_angles,wind_mag,
-    wind_angle,speed_sigmoid_func='new_a',plot=True)
+    wind_angle,speed_sigmoid_func='new_a',plot=True,c1=c1,c2=c2)
 
 #Convert track_heading_angles to a list of plume intersection locations for each fly
 intersection_distances,dispersal_distances = f1_wedge(
@@ -225,6 +231,9 @@ time = 5*60.
 mag = time*dispersing_speeds
 plt.figure(fig1.number)
 
+plt.subplots_adjust(bottom=0.25)
+
+
 fly_dots = plt.scatter(mag*np.cos(track_heading_angles),
     mag*np.sin(track_heading_angles),alpha=1.,#alpha=0.02,
         cmap='cool',c=dispersing_speeds,vmin=0.,vmax=4.)
@@ -238,8 +247,17 @@ fly_dots.set_clim(vmin=0., vmax=4.)
 
 plt.xticks([])
 plt.yticks([])
-axtime = plt.axes([.2, .0, 0.65, 0.03],transform=fig1.transFigure)
+
+axtime = plt.axes([.2, .0,  0.65, 0.03],transform=fig1.transFigure)
 stime = Slider(axtime, 'Time', 0., 20.0, valinit=5.)
+
+ax_c1 = plt.axes([.2, .1, 0.2, 0.03],transform=fig1.transFigure)
+slider_c1 = Slider(ax_c1, 'c_1', 0., 1.0, valinit=0.)
+
+# plt.show( )
+
+ax_c2 = plt.axes([.5, .1, 0.2, 0.03],transform=fig1.transFigure)
+slider_c2 = Slider(ax_c2, 'c_2', 0., 1.0, valinit=1.)
 
 toggle_axis = plt.axes([.35, 0.9, 0.25, 0.05],transform=ax1.transAxes)
 button1 = Button(toggle_axis, 'Headings/Intercepts', color='purple', hovercolor='0.975')
@@ -247,6 +265,8 @@ button1 = Button(toggle_axis, 'Headings/Intercepts', color='purple', hovercolor=
 # ax1.text(1.2,0.5,'test',transform=ax1.transAxes)
 ax1.text(1.3,.5,'Dispersal Speed (m/s)',horizontalalignment='center',
     rotation=-90,verticalalignment='center',fontsize=15,transform=ax1.transAxes)
+
+
 
 #Setting up figure 3, trap arrival histogram
 
@@ -342,8 +362,12 @@ def update(val):
     K = -1.*K_slider.val
     x_0 = x_0_slider.val
     cone_angle = np.radians(cone_angle_slider.val)
+
+    c1 = slider_c1.val
+    c2 = slider_c2.val
+
     track_heading_angles,dispersing_speeds = f0(intended_heading_angles,
-        wind_mag,wind_angle,speed_sigmoid_func='new_a',plot=True)
+        wind_mag,wind_angle,speed_sigmoid_func='new_a',plot=True,c1=c1,c2=c2)
     intersection_distances,dispersal_distances = f1_wedge(
         track_heading_angles,source_pos,wind_angle,cone_angle)
 
@@ -444,6 +468,8 @@ windmag_slider.on_changed(update)
 K_slider.on_changed(update)
 x_0_slider.on_changed(update)
 cone_angle_slider.on_changed(update)
+slider_c1.on_changed(update)
+slider_c2.on_changed(update)
 
 def reset(event):
     windmag_slider.reset()
@@ -451,6 +477,8 @@ def reset(event):
     x_0_slider.reset()
     cone_angle_slider.reset()
     stime.reset()
+    slider_c1.reset()
+    slider_c1.reset()
 
 button.on_clicked(reset)
 
@@ -463,7 +491,8 @@ def toggle(event):
 
     wind_mag = windmag_slider.val
     cone_angle = np.radians(cone_angle_slider.val)
-    track_heading_angles,dispersing_speeds = f0(intended_heading_angles,wind_mag,wind_angle)
+    track_heading_angles,dispersing_speeds = f0(
+        intended_heading_angles,wind_mag,wind_angle,c1=c1,c2=c2)
 
     if scatter_currently_headings:
 
@@ -494,10 +523,15 @@ button1.on_clicked(toggle)
 
 def update1(val):
 
-    wind_mag = windmag_slider.val
-    track_heading_angles,dispersing_speeds = f0(intended_heading_angles,wind_mag,wind_angle)
-
     time = stime.val*60.
+    wind_mag = windmag_slider.val
+    c1 = slider_c1.val
+    c2 = slider_c2.val
+
+
+    track_heading_angles,dispersing_speeds = f0(
+        intended_heading_angles,wind_mag,wind_angle,c1=c1,c2=c2)
+
     fly_dots.set_offsets(
         scipy.c_[
             time*dispersing_speeds*np.cos(track_heading_angles),
