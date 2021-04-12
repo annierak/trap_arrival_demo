@@ -13131,6 +13131,8 @@ div#notebook {
 <span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">Button</span><span class="p">,</span> <span class="n">Box</span><span class="p">,</span> <span class="n">VBox</span><span class="p">,</span> <span class="n">HBox</span><span class="p">,</span> <span class="n">GridBox</span><span class="p">,</span> <span class="n">Label</span>
 <span class="kn">import</span> <span class="nn">ipywidgets</span> <span class="k">as</span> <span class="nn">widgets</span>
 <span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1.inset_locator</span> <span class="kn">import</span> <span class="n">inset_axes</span>
 </pre></div>
 
@@ -14001,7 +14003,7 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Toggle "Headings/Intersections" to switch between seeing how the flies depart from the release point, to seeing where they intersect the plumes.</p>
 <p>Drag "Time" to see how the front of flies expands.</p>
-<p>x_0a and x_0b describe the lowest and highest windspeed at which the flies maintain perfect groundspeed control.</p>
+<p>s_min and s_max describe the lowest and highest windspeed at which the flies maintain perfect groundspeed control.</p>
 
 </div>
 </div>
